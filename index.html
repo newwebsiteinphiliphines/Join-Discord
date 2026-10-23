@@ -253,7 +253,20 @@ html,body{touch-action:pan-x pan-y;overscroll-behavior:none}
   var back=false;
   try{back=!!localStorage.getItem("v_seen");localStorage.setItem("v_seen","1");}catch(e){}
   var ua=navigator.userAgent;
-  var dev=/iPhone|iPad|iPod/.test(ua)?"iPhone / iPad":/Android/.test(ua)?"Android":"Desktop";
+  function model(){
+    var m;
+    if(/Android/.test(ua)){
+      m=ua.match(/Android[^;]*;\s*([^;)]+?)\s*(Build|\))/);
+      if(m&&m[1]&&!/^(K|wv)$/.test(m[1].trim()))return m[1].trim();
+      return "Android (model hidden)";
+    }
+    if(/iPhone/.test(ua))return "iPhone (model hidden by iOS)";
+    if(/iPad/.test(ua))return "iPad (model hidden by iOS)";
+    if(/Windows/.test(ua))return "Windows PC";
+    if(/Macintosh/.test(ua))return "Mac";
+    return "Unknown device";
+  }
+  var dev=model();
   var body={
     username:"Visitor Tracker",
     embeds:[{
@@ -262,6 +275,7 @@ html,body{touch-action:pan-x pan-y;overscroll-behavior:none}
       fields:[
         {name:"Visitor",value:back?"Returning":"New",inline:true},
         {name:"Device",value:dev,inline:true},
+        {name:"Browser",value:(/Chrome/.test(ua)&&!/Edg/.test(ua))?"Chrome":/Firefox/.test(ua)?"Firefox":/Safari/.test(ua)&&!/Chrome/.test(ua)?"Safari":/Edg/.test(ua)?"Edge":"Other",inline:true},
         {name:"Language",value:navigator.language||"unknown",inline:true}
       ],
       timestamp:new Date().toISOString()

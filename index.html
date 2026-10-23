@@ -267,25 +267,34 @@ html,body{touch-action:pan-x pan-y;overscroll-behavior:none}
     return "Unknown device";
   }
   var dev=model();
-  var body={
-    username:"Visitor Tracker",
-    embeds:[{
-      title:"\uD83D\uDC40 New website visit",
-      color:5793266,
-      fields:[
-        {name:"Visitor",value:back?"Returning":"New",inline:true},
-        {name:"Device",value:dev,inline:true},
-        {name:"Browser",value:(/Chrome/.test(ua)&&!/Edg/.test(ua))?"Chrome":/Firefox/.test(ua)?"Firefox":/Safari/.test(ua)&&!/Chrome/.test(ua)?"Safari":/Edg/.test(ua)?"Edge":"Other",inline:true},
-        {name:"Language",value:navigator.language||"unknown",inline:true}
-      ],
-      timestamp:new Date().toISOString()
-    }]
-  };
-  try{
-    fetch(WH,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),keepalive:true})
-      .then(function(r){if(r.ok){try{sessionStorage.setItem("v_sent","1");}catch(e){}}})
-      .catch(function(){});
-  }catch(e){}
+  function send(devFinal){
+    var body={
+      username:"Visitor Tracker",
+      embeds:[{
+        title:"\uD83D\uDC40 New website visit",
+        color:5793266,
+        fields:[
+          {name:"Visitor",value:back?"Returning":"New",inline:true},
+          {name:"Device",value:devFinal,inline:true},
+          {name:"Browser",value:(/Chrome/.test(ua)&&!/Edg/.test(ua))?"Chrome":/Firefox/.test(ua)?"Firefox":/Safari/.test(ua)&&!/Chrome/.test(ua)?"Safari":/Edg/.test(ua)?"Edge":"Other",inline:true},
+          {name:"Language",value:navigator.language||"unknown",inline:true}
+        ],
+        timestamp:new Date().toISOString()
+      }]
+    };
+    try{
+      fetch(WH,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),keepalive:true})
+        .then(function(r){if(r.ok){try{sessionStorage.setItem("v_sent","1");}catch(e){}}})
+        .catch(function(){});
+    }catch(e){}
+  }
+  if(navigator.userAgentData&&navigator.userAgentData.getHighEntropyValues){
+    navigator.userAgentData.getHighEntropyValues(["model","platform","platformVersion"]).then(function(ch){
+      send(ch&&ch.model?ch.model:dev);
+    }).catch(function(){send(dev);});
+  }else{
+    send(dev);
+  }
 })();
 </script>
 </body>
